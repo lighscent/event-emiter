@@ -1,23 +1,25 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, Events } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('event-emiter')
         .setDescription('Simulates an event')
         .addStringOption(option => option.setName('event').setDescription('The event to simulate').setRequired(true).addChoices(
-            { name: 'guildMemberAdd', value: 'guildMemberAdd' },
-            { name: 'ready', value: 'ready' },
+            { name: 'GuildMemberAdd', value: 'GuildMemberAdd' }
         )),
 
-    async execute(client, interaction) {
+    async execute(interaction) {
         const event = interaction.options.getString('event');
+        let client = interaction.client;
 
-        if (event === 'guildMemberAdd') {
-            client.emit('guildMemberAdd', interaction.member);
-        } else if (event === 'ready') {
-            client.emit('ready', client);
+        switch (event) {
+            case 'GuildMemberAdd':
+                client.emit(Events.GuildMemberAdd, interaction.member);
+                break;
+            default:
+                return interaction.reply({ content: 'Event not found', ephemeral: true });
         }
 
-        await interaction.reply({ content: `Simulated event ${event}`, ephemeral: true });
+        interaction.reply({ content: 'Event emitted', ephemeral: true });
     }
 }
